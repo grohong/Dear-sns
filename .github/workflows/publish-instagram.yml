@@ -1,14 +1,16 @@
 name: publish · instagram
 
-# 매일 21:00 KST 에 그날 큐(queue/YYYY-MM-DD.json)를 Instagram 에 올린다.
+# 매일 21:00 미 동부(ET)에 그날 큐(queue/YYYY-MM-DD.json)를 Instagram @dear.couple.app 에 올린다.
 # 큐가 없는 날은 올릴 게 없는 정상 상황이라 성공으로 끝낸다.
-# ⚠️ Actions 의 cron 은 정시에 돌지 않는다(부하 시 수십 분~수 시간 지연). 21:00 로 잡아 여유를 뒀다.
+# ⚠️ Actions 의 cron 은 정시에 돌지 않는다(부하 시 수십 분~수 시간 지연). 저녁 시간대라 여유가 있다.
+# ⚠️ cron 은 UTC 고정이라 서머타임을 따라가지 않는다. 11월 초 EST(UTC-5)가 되면 20:00 ET 로 당겨진다
+#    — 그때 '0 2 * * *' 로 바꾸면 다시 21:00 ET 가 된다.
 
 on:
   # ⏸ 예약 발행 꺼 둠 (2026-09-20) — 수동으로 몇 건 올려 본 뒤 다시 켠다.
   #    켜는 법: 아래 두 줄의 주석을 풀고 커밋·push.
   # schedule:
-  #   - cron: '0 12 * * *' # 12:00 UTC = 21:00 KST
+  #   - cron: '0 1 * * *' # 01:00 UTC = 21:00 ET(EDT) = 10:00 KST 다음날
   workflow_dispatch:
     inputs:
       date:

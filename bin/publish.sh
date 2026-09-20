@@ -19,6 +19,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_FILE="${LOG_FILE:-$REPO_ROOT/log.md}"
 STATE_FILE="${STATE_FILE:-$REPO_ROOT/state/tokens.json}"
 IG_API="https://graph.instagram.com/v21.0"   # Instagram Login 경로. graph.facebook.com 아님
+QUEUE_LANG="${QUEUE_LANG:-en}"               # 큐 JSON 안에서 읽을 언어 키 (.en / .ko)
+ACCOUNT="${ACCOUNT:-@dear.couple.app}"       # log.md 에 남길 계정 표기
 
 DRY_RUN=0
 DATE="$(TZ=Asia/Seoul date +%F)"
@@ -70,17 +72,17 @@ if [ ! -f "$Q" ]; then
   exit 0
 fi
 
-jq -e '.ko.caption and (.ko.images | type == "array" and length > 0)' "$Q" >/dev/null \
-  || die "큐 형식 오류: queue/$DATE.json (.ko.caption / .ko.images 필요)"
+jq -e --arg L "$QUEUE_LANG" '.[$L].caption and (.[$L].images | type == "array" and length > 0)' "$Q" >/dev/null \
+  || die "큐 형식 오류: queue/$DATE.json (.$QUEUE_LANG.caption / .$QUEUE_LANG.images 필요)"
 
 FEATURE="$(jq -r '.featureId // "—"' "$Q")"
 DAY="$(jq -r '.day // "—"' "$Q")"
-CAPTION="$(jq -r '.ko.caption' "$Q")"
+CAPTION="$(jq -r --arg L "$QUEUE_LANG" '.[$L].caption' "$Q")"
 
 IMAGES=()
 while IFS= read -r line; do
   [ -n "$line" ] && IMAGES+=("$line")
-done < <(jq -r '.ko.images[]' "$Q")   # mapfile 대신 — macOS bash 3.2 에서도 돈다
+done < <(jq -r --arg L "$QUEUE_LANG" '.[$L].images[]' "$Q")   # mapfile 대신 — macOS bash 3.2 에서도 돈다
 
 [ "${#IMAGES[@]}" -gt 0 ] || die "$DATE 큐에 이미지가 없습니다."
 [ "${#IMAGES[@]}" -le 10 ] || die "캐러셀은 최대 10장입니다 (현재 ${#IMAGES[@]}장)."
@@ -91,7 +93,7 @@ cap_len=${#CAPTION}
 tag_count="$(grep -o '#' <<<"$CAPTION" | wc -l | tr -d ' ')"
 [ "$tag_count" -le 30 ] || die "해시태그가 ${tag_count}개입니다 (한도 30개)."
 
-say "---- $DATE  Day $DAY  $FEATURE  이미지 ${#IMAGES[@]}장  캡션 ${cap_len}자 ----"
+say "---- $DATE  Day $DAY  $FEATURE  [$QUEUE_LANG]  이미지 ${#IMAGES[@]}장  캡션 ${cap_len}자 ----"
 
 # ── 4. 이미지 공개 URL 확인 ────────────────────────────────────
 # Meta 는 이미지를 업로드받지 않고 URL 을 cURL 로 가져간다.
@@ -175,8 +177,8 @@ IG_POST_ID="$(jq -r '.id' <<<"$resp")"
 say "Instagram 발행 완료  post_id=$IG_POST_ID"
 
 # ── 6. 기록 ───────────────────────────────────────────────────
-printf '| %s | %s | %s | @dear.couple.kr | 게시 | IG %s |\n' \
-  "$DATE" "$DAY" "$FEATURE" "$IG_POST_ID" >> "$LOG_FILE"
+printf '| %s | %s | %s | %s | 게시 | IG %s |\n' \
+  "$DATE" "$DAY" "$FEATURE" "$ACCOUNT" "$IG_POST_ID" >> "$LOG_FILE"
 
 if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
   printf '### Instagram 발행 완료\n\n- 날짜: %s (Day %s · %s)\n- 이미지: %s장\n- post_id: `%s`\n' \

@@ -3,14 +3,15 @@
   "day": 4,
   "featureId": "QNA-04",
   "format": "A",
-  "ko": {
+  "lang": "en",
+  "en": {
     "images": [
-      "d04_1.png",
-      "d04_2.png",
-      "d04_3.png",
-      "d04_4.png"
+      "en04_1.png",
+      "en04_2.png",
+      "en04_3.png",
+      "en04_4.png"
     ],
-    "caption": "먼저 보면 반칙이에요.\n\n내 답을 써야 상대 답이 열려요.\n상대 답에 끌려가지 않고 내 마음을 먼저 적게 되더라고요.\n상대가 확인하기 전까지는 고쳐 쓸 수 있어요.\n\n#커플 #커플스타그램 #커플앱 #커플질문 #교환일기 #연애 #Dear #디어커플",
-    "threads": "답을 먼저 쓴 사람만 상대 답을 볼 수 있게 했어요. 순서 하나 바꿨을 뿐인데 눈치 보고 쓰는 답이 줄더라고요."
+    "caption": "No peeking. Answer first, then you see theirs.\n\nYou write what you actually mean, not what matches theirs.\nYou can edit right up until they open it.\nSame question, completely different answers — that's the fun part.\n\n#couples #couplegoals #couplesapp #dailyquestions #relationshipgoals #DearApp",
+    "threads": "Only the person who answers first gets to see the other's answer. One change to the order, and people stopped writing what they thought the other wanted to hear."
   }
 }

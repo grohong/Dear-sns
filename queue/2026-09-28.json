@@ -3,11 +3,12 @@
   "day": 8,
   "featureId": "—",
   "format": "B",
-  "ko": {
+  "lang": "en",
+  "en": {
     "images": [
-      "d08_1.png"
+      "en08_1.png"
     ],
-    "caption": "우리 처음 설렜던 순간 기억나? 어떤 장면이었어?\n\n같은 날을 떠올려도 기억하는 장면이 다르더라고요.\n두 분은 어떠세요?\n\n#커플 #커플스타그램 #커플질문 #오늘의질문 #연애 #첫만남 #Dear #디어커플",
-    "threads": "같은 날을 떠올려도 두 사람이 기억하는 장면이 다르다는 게, 질문을 만들면서 제일 자주 본 장면이었어요."
+    "caption": "Do you remember when you first fell for me? What was the scene?\n\nTwo people remember the same day and describe completely different moments.\nHow about the two of you?\n\n#couples #couplegoals #dailyquestions #howwemet #relationshipgoals #couplesapp #DearApp",
+    "threads": "Two people remember the same day and describe different scenes. That's the thing I saw most often while writing these questions."
   }
 }

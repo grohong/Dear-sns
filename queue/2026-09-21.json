@@ -3,14 +3,15 @@
   "day": 1,
   "featureId": "QNA-01",
   "format": "A",
-  "ko": {
+  "lang": "en",
+  "en": {
     "images": [
-      "d01_1.png",
-      "d01_2.png",
-      "d01_3.png",
-      "d01_4.png"
+      "en01_1.png",
+      "en01_2.png",
+      "en01_3.png",
+      "en01_4.png"
     ],
-    "caption": "하루 한 질문, 둘만의 대화가 쌓여요.\n\n두 사람이 번갈아 질문을 보내고 함께 답해요.\n오늘은 누구 차례인지 홈 화면이 알려주고요.\n매일 하나씩만 — 그게 더 오래 가더라고요.\n\n#커플 #커플스타그램 #커플앱 #커플다이어리 #커플질문 #100일 #장거리연애 #교환일기 #Dear #디어커플",
-    "threads": "질문을 하루에 하나만 보낼 수 있게 만들었어요. 더 보내게 해달라는 얘기도 듣는데, 매일 하나씩 쌓이는 쪽이 더 오래 간다고 봤거든요."
+    "caption": "One question a day, made for the two of you.\n\nYou take turns sending a question, then you both answer.\nHome tells you whose turn it is.\nJust one a day — that's what makes it stick.\n\n#couples #couplegoals #relationshipgoals #couplesapp #longdistancerelationship #dailyquestions #datenight #DearApp",
+    "threads": "We capped it at one question a day on purpose. People ask for more, but one a day is what people actually keep doing six months later."
   }
 }

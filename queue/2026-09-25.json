@@ -3,11 +3,12 @@
   "day": 5,
   "featureId": "—",
   "format": "B",
-  "ko": {
+  "lang": "en",
+  "en": {
     "images": [
-      "d05_1.png"
+      "en05_1.png"
     ],
-    "caption": "다음 주말에 둘 다 아무것도 안 해도 된다면 뭐 하고 싶어?\n\n답이 갈리면 그것대로 재밌고, 같으면 그날 일정이 정해져요.\n두 분은 어떠세요?\n\n#커플 #커플스타그램 #커플질문 #오늘의질문 #주말데이트 #커플앱 #Dear #디어커플",
-    "threads": "\"다음 주말에 둘 다 아무것도 안 해도 된다면 뭐 하고 싶어?\" 이 질문 하나로 주말 계획이 정해지는 집이 꽤 있을 것 같아요."
+    "caption": "If neither of us had plans next weekend, what would you want to do?\n\nIf your answers differ, that's interesting. If they match, your weekend's sorted.\nHow about the two of you?\n\n#couples #couplegoals #dailyquestions #weekendplans #relationshipgoals #couplesapp #DearApp",
+    "threads": "\"If neither of us had plans next weekend, what would you want to do?\" I suspect this one question settles a lot of Saturdays."
   }
 }

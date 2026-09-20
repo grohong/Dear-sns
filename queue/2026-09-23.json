@@ -3,11 +3,12 @@
   "day": 3,
   "featureId": "PLAY-02",
   "format": "C",
-  "ko": {
+  "lang": "en",
+  "en": {
     "images": [
-      "d03_1.png"
+      "en03_1.png"
     ],
-    "caption": "후라이드 vs 양념, 두 분은 갈리나요?\n\n성향 맞추기에 들어 있는 60문항 중 하나예요.\n둘이 각자 답하고 나면 일치율이 나와요.\n일상 취향 · 먹는 취향 · 여행 스타일 등 6개 팩이 있어요.\n\n#커플 #커플스타그램 #커플앱 #밸런스게임 #커플테스트 #성향테스트 #Dear #디어커플",
-    "threads": "커플 취향 일치율 문항을 60개 만들었는데, 팀 안에서 제일 오래 싸운 게 \"라면 면발 꼬들꼬들 vs 푹 익힘\"이었어요."
+    "caption": "Mountains or beach? Let's see how aligned you two are.\n\nOne of 60 questions in Taste Match.\nYou each answer on your own, then you get a match percentage.\nSix packs: everyday taste, food, screen time, travel, spending, and style.\n\n#couples #couplegoals #couplesapp #couplequiz #wouldyourather #relationshipgoals #DearApp",
+    "threads": "We wrote 60 either-or questions for couples. The one that caused the most arguing on our team was how you like your noodles cooked."
   }
 }

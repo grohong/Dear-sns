@@ -19,6 +19,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_FILE="${LOG_FILE:-$REPO_ROOT/log.md}"
 STATE_FILE="${STATE_FILE:-$REPO_ROOT/state/tokens.json}"
 TH_API="https://graph.threads.net/v1.0"
+QUEUE_LANG="${QUEUE_LANG:-en}"               # 큐 JSON 안에서 읽을 언어 키 (.en / .ko)
+ACCOUNT="${ACCOUNT:-@dear.couple.app}"       # log.md 에 남길 계정 표기
 
 DRY_RUN=0
 DATE="$(TZ=Asia/Seoul date +%F)"
@@ -67,7 +69,7 @@ if [ ! -f "$Q" ]; then
   exit 0
 fi
 
-TEXT="$(jq -r '.ko.threads // empty' "$Q")"
+TEXT="$(jq -r --arg L "$QUEUE_LANG" '.[$L].threads // empty' "$Q")"
 if [ -z "$TEXT" ]; then
   say "$DATE 큐에 Threads 문장이 없습니다 — 건너뜁니다."
   exit 0
@@ -77,7 +79,7 @@ fi
 txt_len=${#TEXT}
 [ "$txt_len" -le 500 ] || die "문장이 ${txt_len}자입니다 (한도 500자)."
 
-say "---- threads $DATE  ${txt_len}자 ----"
+say "---- threads $DATE  [$QUEUE_LANG]  ${txt_len}자 ----"
 
 if [ "$DRY_RUN" = "1" ]; then
   printf '\n─── Threads 문장 미리보기 ───\n%s\n─────────────────────────────\n\n' "$TEXT"
@@ -113,8 +115,8 @@ TH_POST_ID="$(jq -r '.id' <<<"$resp")"
 say "Threads 발행 완료  post_id=$TH_POST_ID"
 
 # ── 5. 기록 ───────────────────────────────────────────────────
-printf '| %s | — | — | Threads @dear.couple.kr | 게시 | TH %s |\n' \
-  "$DATE" "$TH_POST_ID" >> "$LOG_FILE"
+printf '| %s | — | — | Threads %s | 게시 | TH %s |\n' \
+  "$DATE" "$ACCOUNT" "$TH_POST_ID" >> "$LOG_FILE"
 
 if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
   printf '### Threads 발행 완료\n\n- 날짜: %s\n- post_id: `%s`\n' "$DATE" "$TH_POST_ID" >> "$GITHUB_STEP_SUMMARY"
