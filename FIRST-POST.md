@@ -1,0 +1,214 @@
+# 첫 게시물 발행 런북 — Day 1 · QNA-01
+
+> 대상: `~/Developer/Dear/Dear-sns` · 실행: Claude Code 또는 터미널
+> 작성: 2026-09-21 · 상태: ⬜ **미발행**
+>
+> **이 저장소는 여태 한 건도 발행한 적이 없다.** 토큰으로 Meta API 를 호출해 본 적도 없다.
+> 그래서 §3 dry-run 을 건너뛰지 않는다 — 실패한다면 거기서 실패해야 한다.
+
+---
+
+## 0. 지금 상태
+
+| 항목 | 상태 |
+|---|---|
+| 저장소 공개 전환 | ✅ 2026-09-20 |
+| 이미지 21장 push | ✅ `raw.githubusercontent.com` HTTP 200 실측 |
+| 큐 9건 (9/21~9/30, 9/26 제외) | ✅ |
+| 토큰 발급 | ✅ 2026-09-20 → **2026-11-19 만료** |
+| GitHub Secrets 등록 | ❓ **확인 필요 (§2)** |
+| 미커밋 변경분 | ⬜ **push 필요 (§1)** |
+| 예약(cron) 발행 | ⏸ 꺼짐 — 수동 실행만 |
+
+---
+
+## 1. 미커밋 변경분 push
+
+**Actions 는 GitHub 에 올라간 코드를 돌린다.** push 하지 않으면 아래 변경이 반영되지 않는다:
+
+- `bin/publish.sh` · `bin/publish_threads.sh` — **토큰 생존 확인(`check_token`)** 추가.
+  기존 만료일 계산은 "60일 지났나"만 알 뿐, 폐기·비밀번호 변경으로 무효화된 토큰은 못 잡는다.
+- `bin/publish_threads.sh` — `.en.threadsImages` 로 `TEXT` / `IMAGE` / `CAROUSEL` 분기.
+  **push 안 하면 Threads 는 이미지 없이 글만 나간다.**
+- `queue/*.json` 9건 — `threadsImages` 필드 추가.
+- `.github/workflows/publish-threads.yml` — 이미지용 `ASSET_BASE_URL` 주입.
+
+```bash
+cd ~/Developer/Dear/Dear-sns
+git status --short          # 12개 파일이 M 으로 보여야 한다
+git add -A
+git commit -m "Threads 이미지 지원 + 토큰 생존 확인
+
+- publish_threads.sh: .en.threadsImages 로 TEXT/IMAGE/CAROUSEL 분기
+- 캐러셀 날만 2번 카드 1장 (브랜드 가이드 §4.1)
+- 두 스크립트에 check_token 추가 — 만료일 계산으론 무효 토큰을 못 잡는다"
+git push
+```
+
+---
+
+## 2. Secrets 확인
+
+토큰은 **저장소에 없다.** 이 저장소는 공개라서 넣으면 누구나 계정을 쓸 수 있다.
+GitHub Actions Secrets 에 암호화돼 있고, 워크플로 실행 시에만 환경변수로 주입된다.
+
+```bash
+gh secret list
+```
+
+네 줄이 보여야 한다:
+
+```
+IG_USER_ID        Updated ...
+IG_TOKEN          Updated ...
+THREADS_USER_ID   Updated ...
+THREADS_TOKEN     Updated ...
+```
+
+### 없으면 등록
+
+값을 인자로 넘기지 말 것 — 셸 히스토리에 남는다. 아래처럼 실행하면 물어보고, 입력은 화면에 찍히지 않는다.
+
+```bash
+gh secret set IG_USER_ID
+gh secret set IG_TOKEN
+gh secret set THREADS_USER_ID
+gh secret set THREADS_TOKEN
+```
+
+- ID 두 개 → `../Marketing/Dear-SNS-Setup.md` §1.1b
+- 토큰을 다시 발급했다면 **`state/tokens.json` 의 `issued_at` 도 그날로 고친다.** 안 고치면 만료 계산이 어긋난다.
+- `GH_PAT`(선택) 없으면 주간 토큰 갱신이 자동으로 안 되고 만료 임박 시 Issue 만 열린다.
+
+> Secrets 는 한번 넣으면 **아무도 다시 볼 수 없다.** 이름과 갱신 날짜만 보인다.
+
+---
+
+## 3. dry-run — 건너뛰지 말 것
+
+발행하지 않고 토큰·큐·이미지 URL·캡션 한도를 전부 점검한다.
+
+```bash
+gh workflow run publish-instagram.yml -f date=2026-09-21 -f dry_run=true
+sleep 5 && gh run watch
+```
+
+### 통과하면 이렇게 나온다
+
+```
+---- 2026-09-21  Day 1  QNA-01  [en]  이미지 4장  캡션 296자 ----
+이미지 4장 공개 확인 완료 (HTTP 200)
+
+─── 캡션 미리보기 ───
+One question a day, made for the two of you.
+...
+─────────────────────
+
+토큰 정상 — Instagram @dear.couple.app     ← 이 줄이 핵심이다
+DRY RUN — 점검만 하고 발행하지 않았습니다.
+```
+
+**`토큰 정상` 줄을 확인하기 전에는 §4 로 넘어가지 않는다.** 이 줄이 이번 실행의 목적이다.
+
+| 멈춘 지점 | 뜻 | 대응 |
+|---|---|---|
+| `Secret 미설정: ...` | Secrets 없음 | §2 |
+| `이미지 접근 불가 (404)` | push 안 됨 / 저장소 비공개 | §1, 또는 `gh repo edit --visibility public` |
+| `토큰이 유효하지 않습니다` | 토큰 폐기·무효 | Meta 콘솔 재발급 → §2 → `state/tokens.json` 갱신 |
+| `큐 형식 오류` | `.en` 블록 없음 | `jq . queue/2026-09-21.json` 로 확인 |
+| `큐 없음` | 날짜 오타 | `-f date=2026-09-21` |
+
+---
+
+## 4. 실제 발행
+
+```bash
+gh workflow run publish-instagram.yml -f date=2026-09-21 -f dry_run=false
+sleep 5 && gh run watch
+```
+
+캐러셀은 4장을 각각 컨테이너로 만들고 묶은 뒤 30초 대기했다가 발행한다. **2~3분 걸린다.**
+
+```
+컨테이너 생성 18############ — 30초 대기(공식 권장)
+Instagram 발행 완료  post_id=18############
+완료. Threads 는 2시간 뒤 publish-threads 워크플로가 올립니다.
+```
+
+성공하면 워크플로가 `log.md` 에 한 줄을 append 하고 `[skip ci]` 로 커밋·push 한다.
+
+> **중간에 실패하면** 컨테이너만 만들어지고 발행은 안 된 상태다. 컨테이너는 24시간 뒤 자동 만료되니
+> 그대로 두고 원인을 고친 뒤 다시 돌린다. 같은 날짜로 두 번 성공하면 **게시물이 2개 올라간다** —
+> 재실행 전에 Instagram 을 먼저 확인한다.
+
+---
+
+## 5. 눈으로 확인
+
+`instagram.com/dear.couple.app` 에서 볼 것:
+
+- [ ] 4장이 **순서대로** — 훅 → 홈 화면 → How it works → CTA
+- [ ] 우상단 `1/4`~`4/4` 페이지 표기가 잘리지 않았나
+- [ ] 세로 4:5 로 나왔나 (정사각형으로 잘렸으면 안 된다)
+- [ ] 캡션 첫 줄이 피드에서 온전히 보이나
+- [ ] 해시태그 8개가 링크로 잡혔나
+
+**마음에 안 들면 Instagram 앱에서 직접 삭제한다.** Content Publishing API 에는 삭제가 없다.
+지우고 이미지·캡션을 고친 뒤 다시 올리면 된다.
+
+---
+
+## 6. Threads — 2시간 뒤
+
+브랜드 가이드 §8.4 기준 인스타 2시간 뒤. 지금은 예약이 꺼져 있으니 손으로 돌린다.
+
+```bash
+gh workflow run publish-threads.yml -f date=2026-09-21 -f dry_run=true
+sleep 5 && gh run watch
+# "이미지 1장: en01_2.png" + "토큰 정상 — Threads @..." 확인 후
+gh workflow run publish-threads.yml -f date=2026-09-21 -f dry_run=false
+```
+
+올라갈 내용 — **글이 본문이고 이미지는 거드는 역할**이다:
+
+```
+We capped it at one question a day on purpose. People ask for more,
+but one a day is what people actually keep doing six months later.
+```
+
++ `en01_2.png` (홈 화면 카드) 한 장.
+
+§1 을 건너뛰었다면 여기서 이미지 없이 글만 나간다.
+
+---
+
+## 7. 기록
+
+```bash
+git pull                      # 워크플로가 커밋한 log.md 받아오기
+tail -5 log.md
+```
+
+`../Marketing/log.md` 에 운영 기록 한 줄을 사람이 직접 남긴다 — 첫 발행 시각, 눈으로 본 결과, 고칠 점.
+
+---
+
+## 8. 다음 (이 런북 범위 밖)
+
+- **Day 2 (9/22)** — 같은 방식으로 수동 발행. 며칠 손으로 돌려 보고 감을 잡는다.
+- **예약 켜기** — `publish-instagram.yml` / `publish-threads.yml` 의 `on:` 에서 `schedule:` 두 줄 주석 해제.
+  **예약 실행은 아무것도 묻지 않고 바로 올린다.**
+- **Day 6 (9/26)** — 비어 있다. Before/After 카드의 "after" 는 앱이 실제로 만들어낸 질문이어야 해서 캡처가 필요하다.
+  샘플 고민: *"They've been slower to reply lately and I don't know how to bring it up without sounding clingy."*
+- **일정 이동** — 큐 날짜는 파일명에 박혀 있다. iOS 1.1.0 출시일에 맞추려면 9개 파일명과 각 JSON 의 `date` 를 같이 바꾼다.
+- **토큰 만료 2026-11-19** — 주간 `refresh · tokens` 가 굴려 주지만, `GH_PAT` 가 없으면 Issue 만 열린다.
+
+---
+
+## 9. 하지 말 것
+
+- 토큰 값을 인자·코드·로그·커밋·Issue 에 남기기. `set -x` 를 켠 채 curl 실행하기
+- dry-run 없이 바로 `dry_run=false` 로 가기
+- 실패한 실행을 Instagram 확인 없이 재시도하기 (중복 게시 위험)
+- 큐에 없는 날짜를 억지로 채우기 — 앱이 만든 결과를 지어내는 건 특히 금지
+- Meta 앱을 라이브 모드로 전환하기 (본인 계정만 쓰므로 개발 모드로 충분)

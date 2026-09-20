@@ -47,6 +47,18 @@ epoch_of_date() {
   date -u -d "$1" +%s 2>/dev/null || date -u -j -f '%Y-%m-%d' "$1" +%s
 }
 
+# 토큰이 살아 있는지 실제로 물어본다.
+# 아래 만료일 계산은 "60일 지났나"만 알려줄 뿐,
+# 폐기·권한 변경·비밀번호 변경으로 무효화된 토큰은 잡지 못한다.
+check_token() {
+  local resp name
+  resp="$(curl -sS --max-time 20 -G "$IG_API/$IG_USER_ID" \
+          --data-urlencode "fields=username" -d "access_token=$IG_TOKEN" 2>/dev/null || true)"
+  name="$(jq -r '.username // empty' <<<"$resp" 2>/dev/null || true)"
+  [ -n "$name" ] || die "토큰이 유효하지 않습니다 — $(redact "$resp")"
+  say "토큰 정상 — Instagram @$name"
+}
+
 # ── 1. 자격증명 ────────────────────────────────────────────────
 : "${IG_USER_ID:?IG_USER_ID 없음 — 저장소 Secret 을 확인하세요}"
 : "${IG_TOKEN:?IG_TOKEN 없음 — 저장소 Secret 을 확인하세요}"
@@ -112,11 +124,14 @@ say "이미지 ${#URLS[@]}장 공개 확인 완료 (HTTP 200)"
 
 if [ "$DRY_RUN" = "1" ]; then
   printf '\n─── 캡션 미리보기 ───\n%s\n─────────────────────\n\n' "$CAPTION"
+  check_token
   say "DRY RUN — 점검만 하고 발행하지 않았습니다."
   exit 0
 fi
 
 # ── 5. Instagram 발행 ──────────────────────────────────────────
+check_token
+
 ig_post() {  # ig_post <edge> <curl args...>
   local edge="$1"; shift
   curl -sS --max-time 60 -X POST "$IG_API/$IG_USER_ID/$edge" "$@" -d "access_token=$IG_TOKEN"
