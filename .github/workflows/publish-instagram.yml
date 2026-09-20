@@ -1,0 +1,115 @@
+name: publish · instagram
+
+# 매일 21:00 KST 에 그날 큐(queue/YYYY-MM-DD.json)를 Instagram 에 올린다.
+# 큐가 없는 날은 올릴 게 없는 정상 상황이라 성공으로 끝낸다.
+# ⚠️ Actions 의 cron 은 정시에 돌지 않는다(부하 시 수십 분~수 시간 지연). 21:00 로 잡아 여유를 뒀다.
+
+on:
+  schedule:
+    - cron: '0 12 * * *' # 12:00 UTC = 21:00 KST
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'YYYY-MM-DD (비우면 오늘 · Asia/Seoul)'
+        required: false
+        type: string
+      dry_run:
+        description: '발행하지 않고 점검만'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: write # log.md 커밋
+
+concurrency:
+  group: dear-sns-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # 포크에서는 돌지 않게 한다
+    if: github.repository_owner == 'grohong'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 날짜·모드 결정
+        id: prep
+        env:
+          IN_DATE: ${{ inputs.date }}
+          IN_DRY: ${{ inputs.dry_run }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          DATE="${IN_DATE:-}"
+          if [ -z "$DATE" ]; then DATE="$(TZ=Asia/Seoul date +%F)"; fi
+          case "$DATE" in
+            [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) : ;;
+            *) echo "::error::date 형식이 올바르지 않습니다: $DATE"; exit 1 ;;
+          esac
+
+          # 예약 실행은 실제 발행, 수동 실행은 기본값이 dry_run=true
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then DRY="${IN_DRY:-true}"; else DRY="false"; fi
+
+          {
+            echo "date=$DATE"
+            echo "dry=$DRY"
+          } >> "$GITHUB_OUTPUT"
+
+          if [ -f "queue/$DATE.json" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "큐 $DATE · dry_run=$DRY"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::큐 없음 ($DATE) — 오늘은 올릴 게 없습니다."
+          fi
+
+      - name: Secret 확인
+        if: steps.prep.outputs.found == 'true'
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+        run: |
+          missing=()
+          if [ -z "${IG_USER_ID:-}" ]; then missing+=(IG_USER_ID); fi
+          if [ -z "${IG_TOKEN:-}" ]; then missing+=(IG_TOKEN); fi
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::Secret 미설정: ${missing[*]} — Settings → Secrets and variables → Actions 에서 등록하세요."
+            exit 1
+          fi
+
+      - name: 발행
+        if: steps.prep.outputs.found == 'true'
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          # Meta 가 cURL 로 가져갈 수 있는 공개 URL. 저장소가 공개여야 200 이 나온다.
+          ASSET_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/images
+          DATE: ${{ steps.prep.outputs.date }}
+          DRY: ${{ steps.prep.outputs.dry }}
+        run: |
+          args=("$DATE")
+          if [ "$DRY" = "true" ]; then args+=(--dry-run); fi
+          bin/publish.sh "${args[@]}"
+
+      - name: log.md 커밋
+        if: steps.prep.outputs.found == 'true' && steps.prep.outputs.dry == 'false'
+        env:
+          DATE: ${{ steps.prep.outputs.date }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          if git diff --quiet -- log.md; then
+            echo "log.md 변경 없음 — 커밋하지 않습니다."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add log.md
+          git commit -m "chore: publish $DATE [skip ci]"
+          git push origin "HEAD:$BRANCH" || {
+            git pull --rebase --autostash origin "$BRANCH"
+            git push origin "HEAD:$BRANCH"
+          }

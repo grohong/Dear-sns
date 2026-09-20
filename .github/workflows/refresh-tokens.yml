@@ -1,0 +1,68 @@
+name: refresh · tokens
+
+# 매주 월요일 12:00 KST — 토큰을 굴려 만료일을 늘 60일 뒤로 밀어 둔다.
+# 토큰은 60일이면 만료되고 **만료된 뒤에는 갱신할 수 없다.** 이 파이프라인에서 가장 흔한 고장이다.
+#
+# 모드는 GH_PAT Secret 유무로 자동 결정된다.
+#   A(권장) GH_PAT 있음 → 새 토큰을 받아 `gh secret set` 으로 IG_TOKEN / THREADS_TOKEN 을 덮어쓴다.
+#   B       GH_PAT 없음 → 남은 기간이 14일 미만이면 Issue 를 연다. 토큰 값은 Issue 에 쓰지 않는다.
+
+on:
+  schedule:
+    - cron: '0 3 * * 1' # 월요일 03:00 UTC = 12:00 KST
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'auto = 갱신 실행 · warn = 남은 기간만 확인'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - 'auto'
+          - 'warn'
+
+permissions:
+  contents: write # state/tokens.json 커밋
+  issues: write # 모드 B 경고 Issue
+
+concurrency:
+  group: dear-sns-tokens
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.repository_owner == 'grohong'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 토큰 점검·갱신
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          THREADS_TOKEN: ${{ secrets.THREADS_TOKEN }}
+          # PAT 가 없으면 GITHUB_TOKEN 으로 떨어진다 → Secret 쓰기는 불가, Issue 만 가능(모드 B)
+          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+          HAS_PAT: ${{ secrets.GH_PAT != '' }}
+          REFRESH_MODE: ${{ inputs.mode || 'auto' }}
+        run: |
+          # PAT 가 없으면 Secret 을 덮어쓸 수 없으므로 경고 모드로 내린다
+          if [ "$HAS_PAT" != "true" ]; then export REFRESH_MODE=warn; fi
+          bin/refresh_tokens.sh
+
+      - name: state/tokens.json 커밋
+        if: always()
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          if git diff --quiet -- state/tokens.json; then
+            echo "변경 없음 — 커밋하지 않습니다."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/tokens.json
+          git commit -m "chore: refresh tokens [skip ci]"
+          git push origin "HEAD:$BRANCH" || {
+            git pull --rebase --autostash origin "$BRANCH"
+            git push origin "HEAD:$BRANCH"
+          }
