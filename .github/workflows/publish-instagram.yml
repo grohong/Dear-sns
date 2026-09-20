@@ -5,8 +5,10 @@ name: publish · instagram
 # ⚠️ Actions 의 cron 은 정시에 돌지 않는다(부하 시 수십 분~수 시간 지연). 21:00 로 잡아 여유를 뒀다.
 
 on:
-  schedule:
-    - cron: '0 12 * * *' # 12:00 UTC = 21:00 KST
+  # ⏸ 예약 발행 꺼 둠 (2026-09-20) — 수동으로 몇 건 올려 본 뒤 다시 켠다.
+  #    켜는 법: 아래 두 줄의 주석을 풀고 커밋·push.
+  # schedule:
+  #   - cron: '0 12 * * *' # 12:00 UTC = 21:00 KST
   workflow_dispatch:
     inputs:
       date:

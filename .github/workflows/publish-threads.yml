@@ -4,8 +4,10 @@ name: publish · threads
 # 같은 큐 파일의 .ko.threads 문장을 이미지 없이 텍스트로만 올린다 (브랜드 가이드 §4.1).
 
 on:
-  schedule:
-    - cron: '0 14 * * *' # 14:00 UTC = 23:00 KST
+  # ⏸ 예약 발행 꺼 둠 (2026-09-20) — Instagram 워크플로와 같이 다시 켠다.
+  #    켜는 법: 아래 두 줄의 주석을 풀고 커밋·push.
+  # schedule:
+  #   - cron: '0 14 * * *' # 14:00 UTC = 23:00 KST
   workflow_dispatch:
     inputs:
       date:

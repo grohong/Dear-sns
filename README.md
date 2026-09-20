@@ -10,11 +10,15 @@ Instagram [@dear.couple.kr](https://instagram.com/dear.couple.kr) 과 Threads @d
 
 ## 매일 일어나는 일
 
-| 시각 (KST) | 워크플로 | 하는 일 |
-|---|---|---|
-| 21:00 | `publish · instagram` | `queue/오늘.json` → 이미지 URL 200 확인 → Instagram 발행 → `log.md` 커밋 |
-| 23:00 | `publish · threads` | 같은 큐의 `.ko.threads` 한 문장을 텍스트로 발행 |
-| 월 12:00 | `refresh · tokens` | 토큰을 굴려 만료일을 60일 뒤로 밀어 둠 |
+| 시각 (KST) | 워크플로 | 예약 | 하는 일 |
+|---|---|---|---|
+| 21:00 | `publish · instagram` | ⏸ **꺼짐** | `queue/오늘.json` → 이미지 URL 200 확인 → Instagram 발행 → `log.md` 커밋 |
+| 23:00 | `publish · threads` | ⏸ **꺼짐** | 같은 큐의 `.ko.threads` 한 문장을 텍스트로 발행 |
+| 월 12:00 | `refresh · tokens` | ✅ 켜짐 | 토큰을 굴려 만료일을 60일 뒤로 밀어 둠 |
+
+> **발행 예약은 꺼 둔 상태다**(2026-09-20). 지금 발행은 Actions 탭에서 **수동 실행할 때만** 일어난다.
+> 손으로 몇 건 올려 보고 괜찮으면 §예약 켜기 로 넘어간다.
+> 토큰 갱신만 예약대로 돈다 — 게시물을 올리지 않고, 토큰이 조용히 만료되는 걸 막아야 해서 켜 뒀다.
 
 그날 큐 파일이 없으면 **올릴 게 없는 정상 상황**으로 보고 성공으로 끝낸다. 억지로 채우지 않는다.
 
@@ -121,7 +125,22 @@ curl -s "https://graph.threads.net/v1.0/me?fields=id,username&access_token=$THRE
 Actions → `publish · instagram` → Run workflow → `dry_run` **true** → Run.
 
 토큰·큐·이미지 URL 을 전부 점검하고 캡션을 출력하되 **올리지는 않는다.**
-통과하면 같은 방법으로 `dry_run` **false** 로 한 건만 올려 결과를 확인한 뒤 예약에 맡긴다.
+통과하면 같은 방법으로 `dry_run` **false** 로 한 건만 올린다.
+`date` 를 비워 두면 오늘 큐를, 날짜를 넣으면 그날 큐를 올린다.
+
+### 4. 예약 켜기 (손으로 몇 건 올려 본 뒤)
+
+`publish-instagram.yml` · `publish-threads.yml` 의 `on:` 에서 두 줄의 주석을 푼다.
+
+```yaml
+on:
+  schedule:
+    - cron: '0 12 * * *' # instagram · 21:00 KST   (threads 는 '0 14 * * *')
+  workflow_dispatch:
+```
+
+커밋·push 하면 그날부터 예약이 돈다. **예약 실행은 아무것도 묻지 않고 바로 올린다** — 큐가 비어 있는 날은 그냥 건너뛴다.
+잠시 멈추고 싶으면 다시 주석 처리하거나, Actions 탭에서 해당 워크플로를 Disable 한다(수동 실행 버튼도 같이 사라진다).
 
 ---
 
