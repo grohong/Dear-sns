@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Dear SNS — Threads 발행 (Instagram 2시간 뒤, 23:00 KST)
 #
-# 같은 큐 파일의 .ko.threads 문장을 쓴다. 이미지 없이 텍스트만 올린다.
+# 같은 큐 파일의 .en.threads 문장을 쓴다(QUEUE_LANG 으로 바꿀 수 있다). 이미지 없이 텍스트만 올린다.
 # 이유: 브랜드 가이드 §4.1 — Threads 는 인스타 캡션을 복사하는 곳이 아니라
 #       "왜 이렇게 만들었는지"를 만든 사람의 목소리로 한 문장 쓰는 곳이다.
 #
