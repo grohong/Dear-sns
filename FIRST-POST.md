@@ -1,15 +1,18 @@
 # 첫 게시물 발행 런북 — Day 1 · QNA-01
 
 > 대상: `~/Developer/Dear/Dear-sns` · 실행: Claude Code 또는 터미널
-> 작성: 2026-09-21 · 상태: 🟡 **미발행 — 원인 규명됨(사용자 ID 오기입). Secret 교체 후 재시도**
+> 작성: 2026-09-21 · 상태: ✅ **발행 완료 — 2026-09-21 10:35 KST**
 >
-> **2026-09-21 시도 기록**: §1 push ✅ · §2 Secrets 4개 등록 ✅ · §3 dry-run 에서
-> 큐·이미지 4장(HTTP 200)·캡션까지 통과했으나 **토큰 확인에서 `API access blocked`(code 200)** 로 실패.
-> IG·Threads 둘 다 같은 응답 → 토큰이 아니라 **앱(`1564657242573529`) 단위 제한**이다. 아래 §3-1 참고.
-> 실행 로그: `gh run view 35546328757 --log-failed`
+> | 채널 | post_id | 링크 |
+> |---|---|---|
+> | Instagram (캐러셀 4장) | `18103037423102990` | https://www.instagram.com/p/Ddh_eBpjgAr/ |
+> | Threads (글 + 이미지 1장) | `18144500095573747` | https://www.threads.com/@dear.couple.app/post/Ddh_kkqG0Sz |
 >
-> **이 저장소는 여태 한 건도 발행한 적이 없다.** 토큰으로 Meta API 를 호출해 본 적도 없다.
-> 그래서 §3 dry-run 을 건너뛰지 않는다 — 실패한다면 거기서 실패해야 한다.
+> **가는 길에 두 번 막혔다** — 둘 다 원인과 대책을 아래에 남겼다.
+> 1. `API access blocked`(code 200) = 앱 차단이 아니라 **사용자 ID 오기입** → §3-1
+> 2. Threads 워크플로가 **발행은 성공하고 `log.md` 커밋에서 실패** → §7-1
+>
+> 다음 날(Day 2)부터는 §3 dry-run → §4 발행 순서만 반복하면 된다.
 
 ---
 
@@ -24,7 +27,9 @@
 | GitHub Secrets 등록 | ✅ 2026-09-21 — `IG_USER_ID`·`IG_TOKEN`·`THREADS_USER_ID`·`THREADS_TOKEN` 4개 |
 | 미커밋 변경분 | ✅ 2026-09-21 push (`2fbf076`) |
 | Actions 파이프라인 | ✅ 큐·이미지·캡션 점검까지 실측 통과 |
-| **Meta API 접근** | 🟡 **앱은 정상. `IG_USER_ID` 오기입이 원인이었다 — §3-1** |
+| **Meta API 접근** | ✅ 정상. 앱 차단이 아니라 `IG_USER_ID`·`THREADS_USER_ID` 오기입이었다 — §3-1 |
+| **Day 1 발행** | ✅ 2026-09-21 Instagram + Threads 둘 다 |
+| `log.md` 자동 기록 | 🟡 Threads 분은 충돌로 실패 → 사람이 채움. 재발 방지 = §7-1 |
 | 예약(cron) 발행 | ⏸ 꺼짐 — 수동 실행만 |
 
 ---
@@ -276,6 +281,40 @@ tail -5 log.md
 ```
 
 `../Marketing/log.md` 에 운영 기록 한 줄을 사람이 직접 남긴다 — 첫 발행 시각, 눈으로 본 결과, 고칠 점.
+
+### 7-1. `log.md` 커밋 충돌 — 2026-09-21 Threads 에서 발생 ✅ 대책 반영
+
+Threads 워크플로가 이렇게 끝났다:
+
+```
+[main 8404a5b] chore: publish threads 2026-09-21 [skip ci]
+ ! [rejected]  HEAD -> main (fetch first)
+CONFLICT (content): Merge conflict in log.md
+Error: Process completed with exit code 1
+```
+
+**게시물은 올라갔다.** 스크립트는 발행에 성공한 뒤에만 `log.md` 에 줄을 붙이므로,
+여기서 실패하면 잃는 건 기록 한 줄뿐이다 — 런너는 일회용이라 그 커밋은 사라진다.
+
+원인은 **동시 실행**이었다. 두 워크플로가 같은 `concurrency` 그룹인데도 9초 차이로 같이 돌았고
+(IG `01:34:10`~`01:35:20`, Threads `01:34:19` 시작), 둘 다 `log.md` **끝줄에 각자 한 줄**을 붙여 부딪혔다.
+
+대책 두 가지 —
+
+1. **`.gitattributes` 에 `log.md merge=union`** — append 전용 파일이라 양쪽 줄을 모두 남기고 자동 해결한다.
+   (빈 저장소에서 rebase 로 재현·검증함: 충돌 0, 두 줄 모두 보존)
+2. **push 3회 재시도** — 거절되면 `git pull --rebase` 후 다시 민다. 그래도 안 되면 에러 주석으로
+   *"게시물은 이미 올라갔다"* 를 남기고 실패시킨다.
+
+> ⚠️ 이 실패를 보고 **워크플로를 다시 돌리면 같은 게시물이 두 번 올라간다.**
+> 먼저 계정을 확인하고, 이미 올라갔으면 기록만 손으로 채운다.
+
+```bash
+git pull
+# | 2026-09-21 | — | — | Threads @dear.couple.app | 게시 | TH <post_id> · <permalink> |
+```
+
+post_id 는 실행 로그에 있다 — `gh run view <run-id> --log | grep "발행 완료"`.
 
 ---
 
