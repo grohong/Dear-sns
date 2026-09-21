@@ -1,7 +1,12 @@
 # 첫 게시물 발행 런북 — Day 1 · QNA-01
 
 > 대상: `~/Developer/Dear/Dear-sns` · 실행: Claude Code 또는 터미널
-> 작성: 2026-09-21 · 상태: ⬜ **미발행**
+> 작성: 2026-09-21 · 상태: 🟠 **미발행 — Meta 앱 API 차단으로 §3 에서 중단**
+>
+> **2026-09-21 시도 기록**: §1 push ✅ · §2 Secrets 4개 등록 ✅ · §3 dry-run 에서
+> 큐·이미지 4장(HTTP 200)·캡션까지 통과했으나 **토큰 확인에서 `API access blocked`(code 200)** 로 실패.
+> IG·Threads 둘 다 같은 응답 → 토큰이 아니라 **앱(`1564657242573529`) 단위 제한**이다. 아래 §3-1 참고.
+> 실행 로그: `gh run view 35546328757 --log-failed`
 >
 > **이 저장소는 여태 한 건도 발행한 적이 없다.** 토큰으로 Meta API 를 호출해 본 적도 없다.
 > 그래서 §3 dry-run 을 건너뛰지 않는다 — 실패한다면 거기서 실패해야 한다.
@@ -16,8 +21,10 @@
 | 이미지 21장 push | ✅ `raw.githubusercontent.com` HTTP 200 실측 |
 | 큐 9건 (9/21~9/30, 9/26 제외) | ✅ |
 | 토큰 발급 | ✅ 2026-09-20 → **2026-11-19 만료** |
-| GitHub Secrets 등록 | ❓ **확인 필요 (§2)** |
-| 미커밋 변경분 | ⬜ **push 필요 (§1)** |
+| GitHub Secrets 등록 | ✅ 2026-09-21 — `IG_USER_ID`·`IG_TOKEN`·`THREADS_USER_ID`·`THREADS_TOKEN` 4개 |
+| 미커밋 변경분 | ✅ 2026-09-21 push (`2fbf076`) |
+| Actions 파이프라인 | ✅ 큐·이미지·캡션 점검까지 실측 통과 |
+| **Meta API 접근** | 🟠 **차단됨 — `API access blocked` (code 200). §3-1** |
 | 예약(cron) 발행 | ⏸ 꺼짐 — 수동 실행만 |
 
 ---
@@ -114,9 +121,36 @@ DRY RUN — 점검만 하고 발행하지 않았습니다.
 |---|---|---|
 | `Secret 미설정: ...` | Secrets 없음 | §2 |
 | `이미지 접근 불가 (404)` | push 안 됨 / 저장소 비공개 | §1, 또는 `gh repo edit --visibility public` |
-| `토큰이 유효하지 않습니다` | 토큰 폐기·무효 | Meta 콘솔 재발급 → §2 → `state/tokens.json` 갱신 |
+| `토큰이 유효하지 않습니다` + `code 190` | 토큰 폐기·오타·만료 | Meta 콘솔 재발급 → §2 → `state/tokens.json` 갱신 |
+| `토큰이 유효하지 않습니다` + `code 200 · API access blocked` | **앱 단위 차단** — 토큰은 멀쩡하다 | §3-1 |
 | `큐 형식 오류` | `.en` 블록 없음 | `jq . queue/2026-09-21.json` 로 확인 |
 | `큐 없음` | 날짜 오타 | `-f date=2026-09-21` |
+
+### 3-1. `API access blocked` (code 200) — 2026-09-21 여기서 막혔다
+
+토큰 형식이 틀렸으면 `code 190`(Invalid OAuth access token)이 온다. **200 은 토큰이 파싱됐는데 앱의 API 접근이 막혔다는 뜻**이다.
+IG(`graph.instagram.com`)와 Threads(`graph.threads.net`)가 **같은 응답**을 주므로 두 채널이 공유하는 앱 문제다.
+
+앱 대시보드에서 원인을 확인한다 — `developers.facebook.com/apps/1564657242573529`
+
+- [ ] **상단 알림(Alerts) 배너** — 차단 이유가 대개 여기 적혀 있다. 이걸 먼저 본다
+- [ ] **데이터 사용 확인(Data Use Checkup)** 기한 초과 — 미완료면 플랫폼 API 접근이 제한된다
+- [ ] **비즈니스 인증(Business verification)** 요구 여부
+- [ ] **개발자 계정 확인**(전화·신분) 미완료 여부
+- [ ] **앱 역할(Roles)** — `@dear.couple.app` 이 Instagram 테스터·Threads 테스터로 **수락 상태**인지
+      (핸들을 바꿨으므로 역할이 풀렸을 가능성도 본다)
+- [ ] 제품 설정 — Instagram / Threads API 사용 사례가 여전히 붙어 있는지
+
+해제된 뒤에는 **토큰을 다시 만들 필요가 대개 없다.** 아래 한 줄로 살아 있는지부터 확인한다(값은 안 찍힌다).
+
+```bash
+set -a; . ~/.dear-sns/credentials.env; set +a
+curl -s -G "https://graph.instagram.com/v21.0/me" --data-urlencode "fields=username" \
+  -d "access_token=$IG_TOKEN" | jq -r '.username // .error.message'
+# username 이 나오면 §3 dry-run 부터 다시
+```
+
+토큰을 재발급했다면 Secret 교체(§2) + `state/tokens.json` 의 `issued_at` 갱신을 같이 한다.
 
 ---
 
