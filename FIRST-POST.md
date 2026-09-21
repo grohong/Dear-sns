@@ -1,7 +1,7 @@
 # 첫 게시물 발행 런북 — Day 1 · QNA-01
 
 > 대상: `~/Developer/Dear/Dear-sns` · 실행: Claude Code 또는 터미널
-> 작성: 2026-09-21 · 상태: 🟠 **미발행 — Meta 앱 API 차단으로 §3 에서 중단**
+> 작성: 2026-09-21 · 상태: 🟡 **미발행 — 원인 규명됨(사용자 ID 오기입). Secret 교체 후 재시도**
 >
 > **2026-09-21 시도 기록**: §1 push ✅ · §2 Secrets 4개 등록 ✅ · §3 dry-run 에서
 > 큐·이미지 4장(HTTP 200)·캡션까지 통과했으나 **토큰 확인에서 `API access blocked`(code 200)** 로 실패.
@@ -24,7 +24,7 @@
 | GitHub Secrets 등록 | ✅ 2026-09-21 — `IG_USER_ID`·`IG_TOKEN`·`THREADS_USER_ID`·`THREADS_TOKEN` 4개 |
 | 미커밋 변경분 | ✅ 2026-09-21 push (`2fbf076`) |
 | Actions 파이프라인 | ✅ 큐·이미지·캡션 점검까지 실측 통과 |
-| **Meta API 접근** | 🟠 **차단됨 — `API access blocked` (code 200). §3-1** |
+| **Meta API 접근** | 🟡 **앱은 정상. `IG_USER_ID` 오기입이 원인이었다 — §3-1** |
 | 예약(cron) 발행 | ⏸ 꺼짐 — 수동 실행만 |
 
 ---
@@ -126,31 +126,83 @@ DRY RUN — 점검만 하고 발행하지 않았습니다.
 | `큐 형식 오류` | `.en` 블록 없음 | `jq . queue/2026-09-21.json` 로 확인 |
 | `큐 없음` | 날짜 오타 | `-f date=2026-09-21` |
 
-### 3-1. `API access blocked` (code 200) — 2026-09-21 여기서 막혔다
+### 3-1. `API access blocked` (code 200) — 원인: 사용자 ID 오기입 ✅ 2026-09-21 해결
 
-토큰 형식이 틀렸으면 `code 190`(Invalid OAuth access token)이 온다. **200 은 토큰이 파싱됐는데 앱의 API 접근이 막혔다는 뜻**이다.
-IG(`graph.instagram.com`)와 Threads(`graph.threads.net`)가 **같은 응답**을 주므로 두 채널이 공유하는 앱 문제다.
+**앱 차단이 아니었다.** 토큰은 처음부터 멀쩡했다.
 
-앱 대시보드에서 원인을 확인한다 — `developers.facebook.com/apps/1564657242573529`
+```
+토큰이 말하는 ID :  28310077545285687   ← Instagram Login 체계 (맞는 값)
+Secret 에 넣은 ID:  17841433306387861   ← Facebook Login 체계 (틀린 값)
+```
 
-- [ ] **상단 알림(Alerts) 배너** — 차단 이유가 대개 여기 적혀 있다. 이걸 먼저 본다
-- [ ] **데이터 사용 확인(Data Use Checkup)** 기한 초과 — 미완료면 플랫폼 API 접근이 제한된다
-- [ ] **비즈니스 인증(Business verification)** 요구 여부
-- [ ] **개발자 계정 확인**(전화·신분) 미완료 여부
-- [ ] **앱 역할(Roles)** — `@dear.couple.app` 이 Instagram 테스터·Threads 테스터로 **수락 상태**인지
-      (핸들을 바꿨으므로 역할이 풀렸을 가능성도 본다)
-- [ ] 제품 설정 — Instagram / Threads API 사용 사례가 여전히 붙어 있는지
+같은 계정인데 **인증 방식에 따라 사용자 ID 체계가 다르다.**
 
-해제된 뒤에는 **토큰을 다시 만들 필요가 대개 없다.** 아래 한 줄로 살아 있는지부터 확인한다(값은 안 찍힌다).
+| 방식 | 엔드포인트 | ID |
+|---|---|---|
+| **with Instagram Login** ← 우리가 쓰는 것 | `graph.instagram.com` | `28310077545285687` |
+| with Facebook Login | `graph.facebook.com` | `17841433306387861` |
+
+틀린 ID 로 `/{USER_ID}` 를 조회하면 **토큰이 소유하지 않은 객체**를 여는 셈이라 `code 200` 이 난다.
+`API access blocked` 라는 문구가 앱 차단처럼 읽히지만 **code 200 의 원래 뜻은 Permissions error** 다.
+
+> **190 과 200 을 구분할 것.** 190 = 토큰이 깨졌다. 200 = 토큰은 멀쩡한데 권한이 없다.
+
+#### 진단 방법 — 토큰 자신에게 묻는다
+
+`/me` 는 "이 토큰의 주인이 누구냐"를 묻는 것이라 ID 를 틀릴 수가 없다.
 
 ```bash
 set -a; . ~/.dear-sns/credentials.env; set +a
-curl -s -G "https://graph.instagram.com/v21.0/me" --data-urlencode "fields=username" \
-  -d "access_token=$IG_TOKEN" | jq -r '.username // .error.message'
-# username 이 나오면 §3 dry-run 부터 다시
+curl -s "https://graph.instagram.com/v21.0/me?fields=id,username&access_token=$IG_TOKEN"   | jq .
+curl -s "https://graph.threads.net/v1.0/me?fields=id,username&access_token=$THREADS_TOKEN" | jq .
 ```
 
-토큰을 재발급했다면 Secret 교체(§2) + `state/tokens.json` 의 `issued_at` 갱신을 같이 한다.
+#### 조치
+
+```bash
+cd ~/Developer/Dear/Dear-sns
+gh secret set IG_USER_ID      --body "28310077545285687"
+gh secret set THREADS_USER_ID --body "28219132734445707"
+gh secret list                # Updated 날짜가 오늘로 바뀌었는지
+```
+
+✅ **2026-09-21 조치 완료** — Secret 2개 교체 + `~/.dear-sns/credentials.env` 의 ID 2줄도 같이 고쳤다.
+**Threads 도 같은 함정이었다**: 맞는 값은 `28219132734445707`, 틀린 값이 `17841430517193232` 였다.
+로컬 dry-run 에서 양쪽 다 `토큰 정상` 확인.
+
+`bin/publish.sh` · `bin/publish_threads.sh` 의 `check_token` 도 `/me` 로 묻고 ID 를 대조하도록 고쳤다.
+이제 같은 실수를 하면 **양쪽 값을 같이 찍어주며** 멈춘다:
+
+```
+FAIL  Instagram 사용자 ID 가 토큰 소유자와 다릅니다 (Secret=17841… · 토큰=28310…)
+```
+
+### 3-2. 차단이 길어지면 — 오늘 것은 손으로 올린다
+
+**API 차단은 발행을 막지만 게시를 막지는 않는다.** 이미지도 캡션도 이미 완성돼 있다.
+Meta 대시보드 해제를 기다리느라 첫 게시물을 미룰 이유가 없다 — 계정이 비어 있는 날이 하루 더 늘 뿐이다.
+
+1. `instagram.com` 에 `@dear.couple.app` 으로 로그인 → **만들기(Create)**
+2. `~/Developer/Dear/Dear-sns/images/` 에서 **`en01_1` → `en01_2` → `en01_3` → `en01_4`** 순서로 4장 선택
+3. 자르기에서 **세로 4:5** 선택 (정사각형으로 잘리면 페이지 표기 `1/4` 가 잘린다)
+4. 캡션은 `queue/2026-09-21.json` 의 `.en.caption` 을 그대로 붙인다:
+
+```bash
+jq -r '.en.caption' queue/2026-09-21.json | pbcopy   # 클립보드로
+```
+
+5. Threads 는 2시간 뒤 `threads.net` 에서 `.en.threads` 문장 + `images/en01_2.png` 한 장
+
+```bash
+jq -r '.en.threads' queue/2026-09-21.json | pbcopy
+```
+
+손으로 올렸으면 **큐 파일을 지우지 말고** `log.md` 에 기록만 남긴다 — 나중에 자동 발행이 살아났을 때
+같은 날짜를 다시 돌리면 중복 게시가 된다.
+
+```
+| 2026-09-21 | 1 | QNA-01 | @dear.couple.app | 수동 게시 | API 차단 우회 · 워크플로 재실행 금지 |
+```
 
 ---
 

@@ -51,12 +51,16 @@ epoch_of_date() {
 # 아래 만료일 계산은 "60일 지났나"만 알려줄 뿐,
 # 폐기·권한 변경·비밀번호 변경으로 무효화된 토큰은 잡지 못한다.
 check_token() {
-  local resp name
-  resp="$(curl -sS --max-time 20 -G "$IG_API/$IG_USER_ID" \
-          --data-urlencode "fields=username" -d "access_token=$IG_TOKEN" 2>/dev/null || true)"
+  local resp id name
+  # /me 로 묻는다. /{USER_ID} 로 물으면 ID 가 틀렸을 때 code 200(Permissions error)이 나서
+  # "앱이 차단됐다"와 "Secret 의 ID 가 틀렸다"를 구분할 수 없다.
+  resp="$(curl -sS --max-time 20 -G "$IG_API/me" \
+          --data-urlencode "fields=id,username" -d "access_token=${IG_TOKEN}" 2>/dev/null || true)"
+  id="$(jq -r '.id // empty' <<<"$resp" 2>/dev/null || true)"
   name="$(jq -r '.username // empty' <<<"$resp" 2>/dev/null || true)"
-  [ -n "$name" ] || die "토큰이 유효하지 않습니다 — $(redact "$resp")"
-  say "토큰 정상 — Instagram @$name"
+  [ -n "$id" ] || die "토큰이 유효하지 않거나 앱 API 접근이 막혔습니다 — $(redact "$resp")"
+  [ "$id" = "${IG_USER_ID}" ] || die "Instagram 사용자 ID 가 토큰 소유자와 다릅니다 (Secret=${IG_USER_ID} · 토큰=$id) — Secret 을 고치세요."
+  say "토큰 정상 — Instagram @$name ($id)"
 }
 
 # ── 1. 자격증명 ────────────────────────────────────────────────
