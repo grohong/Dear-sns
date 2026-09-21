@@ -7,3 +7,4 @@
 |---|---|---|---|---|---|
 | 2026-09-21 | 1 | QNA-01 | @dear.couple.app | 게시 | IG 18103037423102990 · https://www.instagram.com/p/Ddh_eBpjgAr/ |
 | 2026-09-21 | — | — | Threads @dear.couple.app | 게시 | TH 18144500095573747 · https://www.threads.com/@dear.couple.app/post/Ddh_kkqG0Sz — 워크플로가 기록 커밋에 실패해 사람이 채움 |
+| 2026-09-22 | 2 | — | @dear.couple.app | 게시 | IG 18116258590978478 |
