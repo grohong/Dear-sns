@@ -1,20 +1,14 @@
 {
   "date": "2026-09-24",
-  "day": 4,
-  "featureId": "QNA-04",
-  "format": "A",
+  "day": 3,
+  "featureId": "PLAY-02",
+  "format": "C",
   "lang": "en",
   "en": {
     "images": [
-      "en04_1.png",
-      "en04_2.png",
-      "en04_3.png",
-      "en04_4.png"
+      "en03_1.png"
     ],
-    "caption": "No peeking. Answer first, then you see theirs.\n\nYou write what you actually mean, not what matches theirs.\nYou can edit right up until they open it.\nSame question, completely different answers — that's the fun part.\n\n#couples #couplegoals #couplesapp #dailyquestions #relationshipgoals #DearApp",
-    "threads": "Only the person who answers first gets to see the other's answer. One change to the order, and people stopped writing what they thought the other wanted to hear.",
-    "threadsImages": [
-      "en04_2.png"
-    ]
+    "caption": "Mountains or beach? Let's see how aligned you two are.\n\nOne of 60 questions in Taste Match.\nYou each answer on your own, then you get a match percentage.\nSix packs: everyday taste, food, screen time, travel, spending, and style.\n\n#couples #couplegoals #couplesapp #couplequiz #wouldyourather #relationshipgoals #DearApp",
+    "threads": "We wrote 60 either-or questions for couples. The one that caused the most arguing on our team was how you like your noodles cooked."
   }
 }
