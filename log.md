@@ -9,3 +9,4 @@
 | 2026-09-21 | — | — | Threads @dear.couple.app | 게시 | TH 18144500095573747 · https://www.threads.com/@dear.couple.app/post/Ddh_kkqG0Sz — 워크플로가 기록 커밋에 실패해 사람이 채움 |
 | 2026-09-22 | 2 | — | @dear.couple.app | 게시 | IG 18116258590978478 |
 | 2026-09-22 | — | — | Threads @dear.couple.app | 게시 | TH 17895554244608214 |
+| 2026-09-24 | 3 | PLAY-02 | @dear.couple.app | 게시 | IG 17925995262409995 |
