@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-04",
+  "day": 11,
+  "series": "todays-diary",
+  "featureId": "DIARY-01",
+  "format": "B",
+  "lang": "en",
+  "en": {
+    "images": [
+      "end001.png"
+    ],
+    "caption": "Best moment of the day. That's the whole prompt.\n\nThe shared diary starts with three: Mood, Best moment, Grateful for.\nA line or two each is plenty, and they read it right away.\nWhat was yours today?\n\n#couples #couplegoals #sharedjournal #longdistancerelationship #couplesapp #relationshipgoals #DearApp",
+    "threads": "Three prompts, a line each. That's a whole entry. The point isn't writing well — it's that the other person actually reads it."
+  }
+}

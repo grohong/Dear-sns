@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-06",
+  "day": 13,
+  "series": "todays-number",
+  "featureId": "DIARY-04",
+  "format": "E",
+  "lang": "en",
+  "en": {
+    "images": [
+      "enn001.png"
+    ],
+    "caption": "18 weeks, as squares.\n\nHome shows the last 18 weeks of your shared diary.\nThree colors: you, them, and the days you both wrote.\nIt counts the days in a row, too.\n\n#couples #couplegoals #sharedjournal #couplesapp #relationshipgoals #dailyhabits #DearApp",
+    "threads": "Three colors, not one. The days only one of you wrote look different from the days you both did — that difference is the whole reason it's on the home screen."
+  }
+}

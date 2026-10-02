@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-08",
+  "day": 15,
+  "series": "feature-card",
+  "featureId": "DATE-01",
+  "format": "A",
+  "lang": "en",
+  "en": {
+    "images": [
+      "enf015_1.png",
+      "enf015_2.png",
+      "enf015_3.png",
+      "enf015_4.png"
+    ],
+    "caption": "One calendar, both of your plans.\n\nEvents are colored three ways: yours, theirs, and the ones you're both in.\nA single day, or a trip with a start and an end date.\nEvery event has its own comments, so the back-and-forth stays with the plan.\nYour dating anniversary, birthdays, and wedding anniversary show up on their own.\n\n#couples #couplegoals #couplesapp #sharedcalendar #datenight #relationshipgoals #DearApp",
+    "threads": "Every event carries its own comment thread. Without that, the planning happens in a chat app and the calendar is just a record of what you already decided.",
+    "threadsImages": [
+      "enf015_2.png"
+    ]
+  }
+}
