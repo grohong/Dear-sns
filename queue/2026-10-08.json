@@ -1,21 +1,15 @@
 {
   "date": "2026-10-08",
-  "day": 15,
-  "series": "feature-card",
-  "featureId": "DATE-01",
-  "format": "A",
+  "day": 14,
+  "series": "todays-card",
+  "featureId": "QNA-05",
+  "format": "B",
   "lang": "en",
   "en": {
     "images": [
-      "enf015_1.png",
-      "enf015_2.png",
-      "enf015_3.png",
-      "enf015_4.png"
+      "enc001.png"
     ],
-    "caption": "One calendar, both of your plans.\n\nEvents are colored three ways: yours, theirs, and the ones you're both in.\nA single day, or a trip with a start and an end date.\nEvery event has its own comments, so the back-and-forth stays with the plan.\nYour dating anniversary, birthdays, and wedding anniversary show up on their own.\n\n#couples #couplegoals #couplesapp #sharedcalendar #datenight #relationshipgoals #DearApp",
-    "threads": "Every event carries its own comment thread. Without that, the planning happens in a chat app and the calendar is just a record of what you already decided.",
-    "threadsImages": [
-      "enf015_2.png"
-    ]
+    "caption": "A moment of gratitude, every few days.\n\nAppreciation Cards turn up in your Q&A list on their own.\nFive kinds: gratitude, compliment, affirmation, cheer, and promise.\nSent exactly as you wrote it — Dear doesn't tidy it up.\nThey answer with a heart, and a line if they feel like it.\n\n#couples #couplegoals #appreciation #relationshipgoals #couplesapp #dailyquestions #DearApp",
+    "threads": "The card goes out exactly as you wrote it. No tidying step, on purpose — a polished thank-you reads like a greeting card."
   }
 }
