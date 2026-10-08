@@ -1,15 +1,15 @@
 {
   "date": "2026-10-08",
-  "day": 14,
-  "series": "todays-card",
-  "featureId": "QNA-05",
-  "format": "B",
+  "day": 13,
+  "series": "todays-number",
+  "featureId": "DIARY-04",
+  "format": "E",
   "lang": "en",
   "en": {
     "images": [
-      "enc001.png"
+      "enn001.png"
     ],
-    "caption": "A moment of gratitude, every few days.\n\nAppreciation Cards turn up in your Q&A list on their own.\nFive kinds: gratitude, compliment, affirmation, cheer, and promise.\nSent exactly as you wrote it — Dear doesn't tidy it up.\nThey answer with a heart, and a line if they feel like it.\n\n#couples #couplegoals #appreciation #relationshipgoals #couplesapp #dailyquestions #DearApp",
-    "threads": "The card goes out exactly as you wrote it. No tidying step, on purpose — a polished thank-you reads like a greeting card."
+    "caption": "18 weeks, as squares.\n\nThe Home tab shows the last 18 weeks of your shared diary.\nThree colors: you, them, and the days you both wrote.\nIt counts the days in a row, too.\n\n#couples #couplegoals #sharedjournal #couplesapp #relationshipgoals #dailyhabits #DearApp",
+    "threads": "Three colors, not one. On the Home tab, the days only one of you wrote look different from the days you both did. That difference is the point."
   }
 }

@@ -1,15 +1,15 @@
 {
   "date": "2026-10-11",
-  "day": 17,
-  "series": "todays-taste",
-  "featureId": "PLAY-02",
-  "format": "C",
+  "day": 16,
+  "series": "todays-question",
+  "featureId": "—",
+  "format": "B",
   "lang": "en",
   "en": {
     "images": [
-      "ent001.png"
+      "enq002.png"
     ],
-    "caption": "Morning person or night owl? That's question one of sixty.\n\nTaste Match has six packs of ten: lifestyle basics, food cravings, movies and music, travel style, spending style, and senses and vibe.\nYou each answer on your own, then you get a match rate and a question-by-question comparison.\nWhich one are the two of you?\n\n#couples #couplegoals #couplesapp #couplequiz #wouldyourather #relationshipgoals #DearApp",
-    "threads": "Morning person or night owl is question one of sixty. The match rate at the end matters less than the three or four where you were sure you already knew their answer."
+    "caption": "What matters most to you these days, and why does it feel so big right now?\n\nOne of the deeper ones in the pool.\nWorth asking on an ordinary day, not saving for a big talk.\n\n#couples #couplegoals #dailyquestions #relationshipgoals #couplesapp #DearApp",
+    "threads": "\"What matters most to you these days, and why does it feel so big right now?\"\n\nThe second half is the part that does the work."
   }
 }
