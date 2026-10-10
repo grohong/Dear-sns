@@ -1,15 +1,21 @@
 {
   "date": "2026-10-11",
-  "day": 16,
-  "series": "todays-question",
-  "featureId": "—",
-  "format": "B",
+  "day": 15,
+  "series": "feature-card",
+  "featureId": "DATE-01",
+  "format": "A",
   "lang": "en",
   "en": {
     "images": [
-      "enq002.png"
+      "enf015_1.png",
+      "enf015_2.png",
+      "enf015_3.png",
+      "enf015_4.png"
     ],
-    "caption": "What matters most to you these days, and why does it feel so big right now?\n\nOne of the deeper ones in the pool.\nWorth asking on an ordinary day, not saving for a big talk.\n\n#couples #couplegoals #dailyquestions #relationshipgoals #couplesapp #DearApp",
-    "threads": "\"What matters most to you these days, and why does it feel so big right now?\"\n\nThe second half is the part that does the work."
+    "caption": "One calendar, both of your plans.\n\nEvents are colored three ways: yours, theirs, and the ones you're both in.\nA single day, or a trip with a start and an end date.\nEvery event has its own comments, so the back-and-forth stays with the plan.\nYour dating anniversary, birthdays, and wedding anniversary show up on their own.\n\n#couples #couplegoals #couplesapp #sharedcalendar #datenight #relationshipgoals #DearApp",
+    "threads": "Every event carries its own comment thread. Without that, the planning happens in a chat app and the calendar is just a record of what you already decided.",
+    "threadsImages": [
+      "enf015_2.png"
+    ]
   }
 }
