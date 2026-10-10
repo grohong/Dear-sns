@@ -34,3 +34,4 @@
 | 2026-10-08 | 13 | DIARY-04 | @dear.couple.app | 게시 | IG 18219326806347771 |
 | 2026-10-08 | — | — | Threads @dear.couple.app | 게시 | TH 18099259334532761 |
 | 2026-10-10 | 14 | QNA-05 | @dear.couple.app | 게시 | IG 18127034200868305 |
+| 2026-10-10 | — | — | Threads @dear.couple.app | 게시 | TH 18119009290979767 |
